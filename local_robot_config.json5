@@ -1,0 +1,15 @@
+{
+  "plugins": {
+    "ros2dds": {
+      "nodename": "zenoh_bridge_jazzy",
+      "namespace": "/jazzy",
+      "domain": 0
+    }
+  },
+  "mode": "router",
+  "listen": {
+    "endpoints": [
+      "tcp/127.0.0.1:7447"
+    ]
+  }
+}
