@@ -1,0 +1,14 @@
+{
+  "plugins": {
+    "ros2dds": {
+      "nodename": "zenoh_bridge_lab",
+      "namespace": "/"
+    }
+  },
+  "mode": "router",
+  "connect": {
+    "endpoints": [
+      "tcp/<ROBOT_IP_ADDRESS>:7447"
+    ]
+  }
+}
