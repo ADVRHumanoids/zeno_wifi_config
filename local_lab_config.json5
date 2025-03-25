@@ -1,0 +1,19 @@
+{
+  "plugins": {
+    "ros2dds": {
+      "nodename": "zenoh_bridge_lab",
+      "namespace": "/"
+    }
+  },
+  "mode": "router",
+  "listen": {
+    "endpoints": [
+      "tcp/127.0.0.1:7448"
+    ]
+  },
+  "connect": {
+    "endpoints": [
+      "tcp/127.0.0.1:7447"
+    ]
+  }
+}
