@@ -1,0 +1,79 @@
+{
+  "plugins": {
+    // This section defines all plugins that the Zenoh bridge will load and use
+    
+    "ros2dds": {
+      // This specific plugin handles the translation between ROS2 DDS and Zenoh protocols
+
+      "nodename": "zenoh_bridge_jazzy",
+      // Sets the ROS node name for this bridge - this is how it will appear in ROS node lists
+
+      "namespace": "/jazzy",
+      // Defines the namespace prefix that will be added to all topics when they cross the bridge
+      
+      "domain": 0,
+      // Specifies which ROS Domain ID to use for DDS discovery
+      // Must match the ROS_DOMAIN_ID environment variable used by your ROS nodes
+      
+      "deny": {
+        "publishers": [
+          ".*/debug/.*",        // Block debug topics
+          // This regular expression will match any topic containing "/debug/" anywhere in its name
+          // For example: "/jazzy/sensor/debug/raw" or "/motor/debug/status" would be blocked
+          
+          ".*/raw/.*"           // Block raw data topics
+          // Similarly blocks any topics containing "/raw/" in their path
+        ]
+      },
+      // The "deny" section prevents specific topics from being transmitted over the Zenoh network
+      // This helps reduce bandwidth usage by filtering out non-essential or very verbose topics
+      
+      "pub_max_frequencies": [
+        ".*/camera/image_raw=5",
+        // Limits camera image transmission to 5Hz maximum, regardless of how fast the actual camera publishes
+        
+        ".*/lidar_scan=10",
+        // Similarly limits lidar scan data to 10Hz maximum
+        
+        ".*/pointcloud=2"
+        // Restricts pointcloud data to just 2Hz
+      ],
+      // The "pub_max_frequencies" section sets maximum transmission rates for specific topics
+      "pub_priorities": [
+        "/emergency_stop=1:express",
+        // Gives emergency stop commands the highest possible priority (1) with express delivery
+        // "express" means these messages bypass normal batching for immediate transmission
+        // This ensures safety-critical commands get through even during network congestion
+        
+        "/cmd_vel=2:express",
+        // Motion commands get the second-highest priority, also with express delivery
+        // This helps ensure responsive control of the robot even when the network is busy
+        
+        "/pose=3",
+        // Position data gets medium-high priority (3) but without express delivery
+        // This balances timely position updates without the overhead of express delivery
+        
+        "/diagnostic=7"
+        // Diagnostic data gets the lowest priority (7)
+        // This means if bandwidth is limited, diagnostic data will be delayed in favor of more critical messages
+      ]
+      // The priority system ensures critical messages are delivered first during network congestion
+      // Think of this like an emergency vehicle priority system for your robot's communication
+    }
+  },
+  
+  "mode": "router",
+  // Sets this bridge to operate in "router" mode, which means it acts as a connection point for other bridges
+  // Router mode allows it to connect with multiple other Zenoh nodes and route messages between them
+  // Alternative modes would be "peer" or "client" which have different networking behaviors
+  
+  "listen": {
+    "endpoints": [
+      "tcp/0.0.0.0:7447"
+      // Configures the bridge to listen for incoming TCP connections on port 7447
+      // The "0.0.0.0" address means it will accept connections on any network interface
+    ]
+  }
+  // The listen section determines how other Zenoh nodes (like your lab computer) can connect to this bridge
+  // This is what makes the robot discoverable and accessible over the network
+}
