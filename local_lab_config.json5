@@ -2,18 +2,68 @@
   "plugins": {
     "ros2dds": {
       "nodename": "zenoh_bridge_lab",
-      "namespace": "/"
+      "namespace": "/", // Lab PC sees topics under the robot's namespace if robot config uses one
+      "domain": 0,
+      // DDS Isolation setting for ROS 2 Jazzy+
+      "ros_automatic_discovery_range": "LOCALHOST",
+
+      //// ==== Optional Advanced Features (Commented Out) ====
+      //// These settings control which ROS interfaces the LAB PC bridge exposes to Zenoh
+      //// or subscribes to from Zenoh. Filtering is often more critical on the Robot side
+      //// to limit outgoing traffic, but can be used here too.
+
+      //// --- Topic Filtering ---
+      //// Option A: 'allow'
+      // allow: {
+      //   publishers: [".*/cmd_vel"], // Example: Only allow lab publishing cmd_vel over Zenoh
+      //   subscribers: [".*/odom", ".*/scan", "/tf", "/tf_static"], // Example: Only allow lab subscribing to these from Zenoh
+      // },
+
+      //// Option B: 'deny'
+      //// Cannot use 'allow' and 'deny' at the same time.
+      // deny: {
+      //   publishers: [], // Example: Don't deny any specific topics published from lab
+      //   subscribers: ["/rosout", "/parameter_events"], // Example: Don't subscribe to noisy topics via Zenoh
+      // },
+
+      //// --- Frequency Control (Downsampling) ---
+      //// Limit the rate for topics published FROM the lab PC over Zenoh.
+      // pub_max_frequencies: [
+      //    ".*/cmd_vel=10.0" // Example: Limit command publishing rate from lab if needed
+      // ],
+
+      //// --- Message Prioritization ---
+      //// Set priorities for topics published FROM the lab PC over Zenoh.
+      // pub_priorities: [
+      //   ".*/cmd_vel=1:express" // Example: Highest priority, low latency for commands from lab
+      // ],
+
+      //// --- Reliability Control ---
+      // reliable_routes_blocking: true, // Default is true
+
+      //// --- Query Timeouts ---
+      // queries_timeout: {
+      //   default: 5.0,
+      //   services: ["call_robot_service=10.0", ".*=1.0"],
+      //   actions: {
+      //     send_goal: 1.0,
+      //     cancel_goal: 1.0,
+      //     get_result: [".*long_mission=3600.0", ".*=300.0"],
+      //   }
+      // },
     }
   },
   "mode": "router",
   "listen": {
     "endpoints": [
-      "tcp/127.0.0.1:7448"
+      // Listen on all interfaces on the Lab PC
+      "tcp/0.0.0.0:7447"
     ]
   },
   "connect": {
     "endpoints": [
-      "tcp/127.0.0.1:7447"
+      // Connect to the Robot's IP
+      "tcp/10.24.4.100:7447" // <-- Replace with actual Robot IP
     ]
   }
 }

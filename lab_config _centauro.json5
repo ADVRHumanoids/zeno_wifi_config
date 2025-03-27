@@ -1,0 +1,74 @@
+{
+  "plugins": {
+    "ros2dds": {
+      "nodename": "zenoh_bridge_robot",
+      "namespace": "/",
+      "domain": 0,
+      // DDS Isolation setting for ROS 2 Jazzy+
+      "ros_automatic_discovery_range": "LOCALHOST",
+
+      //// ==== Optional Advanced Features (Commented Out) ====
+
+      //// --- Topic Filtering ---
+      //// Option A: 'allow' - Only route interfaces matching these regex lists.
+      //// If a type (publishers, subscribers, etc.) is empty or missing, NONE are allowed.
+      // allow: {
+      //   publishers: [".*/odom", ".*/scan", "/tf", "/tf_static"], // Example: Allow odom, scan, and tf topics
+      //   subscribers: [".*/cmd_vel"], // Example: Allow cmd_vel subscriptions
+      // },
+
+      //// Option B: 'deny' - Route all interfaces EXCEPT those matching these regex lists.
+      //// Cannot use 'allow' and 'deny' at the same time.
+      // deny: {
+      //   publishers: ["/rosout", "/parameter_events"], // Example: Deny noisy topics
+      //   subscribers: [], // Example: Deny no specific subscriptions
+      // },
+
+      //// --- Frequency Control (Downsampling) ---
+      //// Limit the rate at which specific topics are forwarded over Zenoh (in Hertz).
+      // pub_max_frequencies: [
+      //   ".*/scan=5.0", // Example: Forward laser scan at max 5 Hz
+      //   "/tf=10.0" // Example: Forward TF at max 10 Hz
+      // ],
+
+      //// --- Message Prioritization ---
+      //// Set Zenoh publication priorities (1=Highest, 7=Lowest, Default=5).
+      //// Use ':express' for lower latency (potentially impacting throughput).
+      // pub_priorities: [
+      //   "/tf=2:express", // Example: High priority, low latency for TF
+      //   ".*/cmd_vel=3", // Example: High priority for commands (if subscribing on robot)
+      //   ".*/odom=4", // Example: Medium-high priority for odometry
+      //   ".*/scan=6" // Example: Lower priority for potentially high-bandwidth scans
+      // ],
+
+      //// --- Reliability Control ---
+      //// Determines if reliable DDS routes block (true) or drop (false) on congestion.
+      // reliable_routes_blocking: true, // Default is true
+
+      //// --- Query Timeouts ---
+      //// Configure timeouts (in seconds) for Zenoh queries (e.g., service calls, action goals).
+      // queries_timeout: {
+      //   default: 5.0, // Default for unspecified queries
+      //   services: ["add_two_ints=0.5", ".*=1.0"], // Specific timeouts for services
+      //   actions: { // Specific timeouts for action components
+      //     send_goal: 1.0,
+      //     cancel_goal: 1.0,
+      //     get_result: [".*long_mission=3600.0", ".*=300.0"], // Longer timeouts for results
+      //   }
+      // },
+    }
+  },
+  "mode": "router",
+  "listen": {
+    "endpoints": [
+      // Listen on all interfaces on the robot
+      "tcp/0.0.0.0:7447"
+    ]
+  },
+  "connect": {
+    "endpoints": [
+      // Connect to the Lab PC's IP
+      "tcp/10.24.4.79:7447" // <-- Replace with actual Lab PC IP
+    ]
+  }
+}
